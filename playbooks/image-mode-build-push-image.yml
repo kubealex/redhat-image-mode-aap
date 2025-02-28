@@ -1,0 +1,56 @@
+---
+- name: Image Mode CI/CD - AAP | Build RHEL Image Mode container
+  hosts: build_host
+  tasks:
+    - name: Image Mode CI/CD - AAP | Set working directory
+      ansible.builtin.set_fact:
+        workdir: "/home/{{ ansible_user }}/rhel-image-mode"
+
+    - name: Image Mode CI/CD - AAP | Clone repo
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ workdir }}/{{ build_folder }}"
+
+    - name: Image Mode CI/CD - AAP | Login to registry
+      no_log: true
+      containers.podman.podman_login:
+        registry: "{{ item.registry }}"
+        username: "{{ item.username }}"
+        password: "{{ item.password }}"
+      loop:
+        - registry: "{{ custom_registry_url }}"
+          username: "{{ custom_registry_username }}"
+          password: "{{ custom_registry_password }}"
+        - registry: "{{ redhat_registry_url }}"
+          username: "{{ redhat_registry_username }}"
+          password: "{{ redhat_registry_password }}"
+
+    - name: Image Mode CI/CD - AAP | Build RHEL Image
+      containers.podman.podman_image:
+        name: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}"
+        build_args:
+          force_rm: true
+          extra_args: "--build-arg REGISTRY_URL={{ custom_registry_url }} --build-arg REGISTRY_USER={{ custom_registry_username }}"
+        path: "{{ workdir }}/{{ build_folder }}"
+        pull: false
+
+    - name: Image Mode CI/CD - AAP | Tag Image
+      containers.podman.podman_tag:
+        image: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}:latest"
+        target_names:
+          - "{{ custom_registry_url }}/{{ custom_registry_username }}/rhel-image-mode-demo:{{ item }}"
+      loop: "{{ image_tags }}"
+
+    - name: Image Mode CI/CD - AAP | Push RHEL Image
+      containers.podman.podman_image:
+        name: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}"
+        path: "{{ workdir }}/{{ build_folder }}"
+        push: true
+        pull: false
+        tag: "{{ item }}"
+      loop: "{{ image_tags }}"
+
+    - name: Image Mode CI/CD - AAP | Cleanup local working directory
+      ansible.builtin.file:
+        path: "{{ workdir }}"
+        state: absent

@@ -1,0 +1,17 @@
+---
+- name: Image Mode CI/CD - AAP | Configure AAP Controller
+  import_playbook: configure-aap-controller.yml
+- name: Image Mode CI/CD - AAP | Finalize Workshop Configuration
+  hosts: localhost
+  vars_files:
+    - demo-setup-vars.yml
+  tasks:
+    - name: Image Mode CI/CD - AAP | Run Builder server config
+      ansible.controller.job_launch:
+        controller_host: "{{ aap2_controller_url }}"
+        controller_username: "{{ aap2_controller_username }}"
+        controller_password: "{{ aap2_controller_password }}"
+        validate_certs: "{{ aap2_controller_validate_ssl | default(false, true) }}"
+        organization: Default
+        job_template: "[Image Mode CI/CD - AAP] Prepare builder server"
+        wait: true

@@ -1,0 +1,25 @@
+---
+- name: Image Mode CI/CD - AAP | Build RHEL Image Mode container
+  hosts: build_host
+  tasks:
+    - name: Image Mode CI/CD - AAP | Set working directory
+      ansible.builtin.set_fact:
+        workdir: "/home/{{ ansible_user }}/rhel-image-mode"
+
+    - name: Image Mode CI/CD - AAP | Ensure packages are up to date
+      become: true
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: Image Mode CI/CD - AAP | Ensure Podman is present
+      become: true
+      ansible.builtin.dnf:
+        name: container-tools
+        state: present
+
+    - name: Image Mode CI/CD - AAP | Create local working directory
+      ansible.builtin.file:
+        path: "{{ workdir }}/output"
+        state: directory
+        mode: "0775"
