@@ -48,7 +48,7 @@
     - name: Image Mode CI/CD - AAP | Push RHEL Image
       containers.podman.podman_image:
         name: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}"
-        path: "{{ _build_dir }}"
+        path: "{{ build_dir }}"
         push: true
         pull: false
         tag: "{{ item }}"
