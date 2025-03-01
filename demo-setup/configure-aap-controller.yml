@@ -1,17 +1,13 @@
 ---
-- name: Playbook for configuring AAP2 Controller resources
+- name: Image Mode CI/CD - AAP | Playbook for AAP2 Controller resources configuration
   hosts: localhost
   vars_files:
     - demo-setup-vars.yml
-  pre_tasks:
-    - name: Configure SSL Verification for Git projects
-      ansible.controller.settings:
-        controller_host: "{{ aap2_controller_url }}"
-        controller_username: "{{ aap2_controller_username }}"
-        controller_password: "{{ aap2_controller_password }}"
-        validate_certs: "{{ aap2_controller_validate_ssl | default(false, true) }}"
-        name: AWX_TASK_ENV
-        value:
-          GIT_SSL_NO_VERIFY: "true"
+  vars:
+    aap_hostname: "{{ aap2_controller_url }}"
+    aap_username: "{{ aap2_controller_username }}"
+    aap_password: "{{ aap2_controller_password }}"
+    aap_validate_certs: false
+    aap_configuration_async_retries: 60
   roles:
-    - role: role_aap_controller_setup
+    - role: infra.aap_configuration.dispatch
