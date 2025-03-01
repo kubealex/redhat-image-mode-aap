@@ -6,20 +6,6 @@
       ansible.builtin.set_fact:
         workdir: "/home/{{ ansible_user }}/rhel-image-mode"
 
-    - name: Image Mode CI/CD - AAP | Login to registry - Local user
-      no_log: true
-      containers.podman.podman_login:
-        registry: "{{ item.registry }}"
-        username: "{{ item.username }}"
-        password: "{{ item.password }}"
-      loop:
-        - registry: "{{ custom_registry_url }}"
-          username: "{{ custom_registry_username }}"
-          password: "{{ custom_registry_password }}"
-        - registry: "{{ redhat_registry_url }}"
-          username: "{{ redhat_registry_username }}"
-          password: "{{ redhat_registry_password }}"
-
     - name: Image Mode CI/CD - AAP | Login to registry - Root
       become: true
       no_log: true
