@@ -63,7 +63,6 @@
     #       """
     #     dest: "{{ workdir }}/config.toml"
 
-
     - name: Image Mode CI/CD - AAP | Generate ISO Image with bootc-image-builder
       become: true
       containers.podman.podman_container:
@@ -88,6 +87,11 @@
       until: not _output.containers.0.State.Running
       retries: 50
       delay: 30
+
+    - name: Image Mode CI/CD - AAP | Remove bootc-image-builder container
+      containers.podman.podman_container:
+        name: bootc-image-builder
+        state: absent
 
     - name: Image Mode CI/CD - AAP | Fix permissions
       become: true
