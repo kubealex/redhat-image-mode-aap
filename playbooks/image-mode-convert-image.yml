@@ -76,6 +76,7 @@
         state: started
         volumes:
           - "/var/lib/containers/storage:/var/lib/containers/storage"
+          - "/run/containers/0:/run/containers/0"
           - "{{ workdir }}/config.toml:/config.toml"
           - "{{ workdir }}/output:/output"
         command: "--type {{ destination_image_format }} --config /config.toml --tls-verify=false {{ custom_registry_url }}/{{ custom_registry_username }}/{{ source_image_name }}:{{ source_image_tag }}"
