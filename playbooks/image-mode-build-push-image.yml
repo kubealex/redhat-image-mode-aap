@@ -9,7 +9,8 @@
     - name: Image Mode CI/CD - AAP | Clone repo
       ansible.builtin.git:
         repo: "{{ repo_url }}"
-        dest: "{{ workdir }}/{{ build_folder }}"
+        dest: "{{ workdir }}"
+      register: _build_dir
 
     - name: Image Mode CI/CD - AAP | Login to registry
       no_log: true
@@ -31,7 +32,7 @@
         build_args:
           force_rm: true
           extra_args: "--build-arg REGISTRY_URL={{ custom_registry_url }} --build-arg REGISTRY_USER={{ custom_registry_username }}"
-        path: "{{ workdir }}/{{ build_folder }}"
+        path: "{{ _build_dir }}"
         pull: false
 
     - name: Image Mode CI/CD - AAP | Tag Image
@@ -44,7 +45,7 @@
     - name: Image Mode CI/CD - AAP | Push RHEL Image
       containers.podman.podman_image:
         name: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}"
-        path: "{{ workdir }}/{{ build_folder }}"
+        path: "{{ _build_dir }}"
         push: true
         pull: false
         tag: "{{ item }}"
