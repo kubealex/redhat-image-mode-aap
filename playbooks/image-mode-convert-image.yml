@@ -41,6 +41,9 @@
       ansible.builtin.copy:
         content: "{{ config_toml_content }}"
         dest: "{{ workdir }}/config.toml"
+      when:
+        - config_toml_content is defined
+        - config_toml_content != ""
 
     # - name: Image Mode CI/CD - AAP | Embed Kickstart into configuration
     #   ansible.builtin.copy:
