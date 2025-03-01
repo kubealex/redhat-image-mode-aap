@@ -77,7 +77,6 @@
 
     - name: Image Mode CI/CD - AAP | Generate ISO Image with bootc-image-builder
       become: true
-      when: not qcow_image.stat.exists
       containers.podman.podman_container:
         name: bootc-image-builder
         image: registry.redhat.io/rhel9/bootc-image-builder:latest
