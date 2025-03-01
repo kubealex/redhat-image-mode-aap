@@ -31,6 +31,9 @@
         - registry: "{{ redhat_registry_url }}"
           username: "{{ redhat_registry_username }}"
           password: "{{ redhat_registry_password }}"
+        - registry: "{{ redhat_registry_url }}"
+          username: "{{ redhat_registry_username }}"
+          password: "{{ redhat_registry_password }}"
 
     - name: Image Mode CI/CD - AAP | Generate output folder for resulting image
       ansible.builtin.file:
