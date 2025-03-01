@@ -37,40 +37,39 @@
         path: "{{ workdir }}/output"
         state: directory
 
-    - name: Image Mode CI/CD - AAP | Get stats of the FS object
-      ansible.builtin.stat:
-        path: "{{ workdir }}/output/bootiso/install.iso"
-      register: qcow_image
-
-
     - name: Image Mode CI/CD - AAP | Embed Kickstart into configuration
       ansible.builtin.copy:
-        content: |
-          [customizations.installer.kickstart]
-          contents = """
-          reboot
-          network --bootproto=dhcp
-          zerombr
-          clearpart --all --initlabel --disklabel=gpt
-          part biosboot  --size=1    --fstype=biosboot
-          part /boot --size=1024 --fstype=ext4 --label=boot
-          part /boot/efi --size=100  --fstype=efi
-          part / --size=1000 --fstype=xfs --grow
-          keyboard us
-          lang en_US
-          timezone Europe/Rome
-          rootpw redhat
-          %post
-          mkdir -p /etc/containers/registries.conf.d/
-          cat > /etc/containers/registries.conf.d/gitea-registry.conf << 'EOF'
-          [[registry]]
-          location = "{{ custom_registry_url }}"
-          insecure = true
-          EOF
-          bootc switch --mutate-in-place --transport registry {{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}:{{ image_tag }}
-          %end
-          """
+        content: "{{ config_toml_content }}"
         dest: "{{ workdir }}/config.toml"
+
+    # - name: Image Mode CI/CD - AAP | Embed Kickstart into configuration
+    #   ansible.builtin.copy:
+    #     content: |
+    #       [customizations.installer.kickstart]
+    #       contents = """
+    #       reboot
+    #       network --bootproto=dhcp
+    #       zerombr
+    #       clearpart --all --initlabel --disklabel=gpt
+    #       part biosboot  --size=1    --fstype=biosboot
+    #       part /boot --size=1024 --fstype=ext4 --label=boot
+    #       part /boot/efi --size=100  --fstype=efi
+    #       part / --size=1000 --fstype=xfs --grow
+    #       keyboard us
+    #       lang en_US
+    #       timezone Europe/Rome
+    #       rootpw redhat
+    #       %post
+    #       mkdir -p /etc/containers/registries.conf.d/
+    #       cat > /etc/containers/registries.conf.d/gitea-registry.conf << 'EOF'
+    #       [[registry]]
+    #       location = "{{ custom_registry_url }}"
+    #       insecure = true
+    #       EOF
+    #       bootc switch --mutate-in-place --transport registry {{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}:{{ image_tag }}
+    #       %end
+    #       """
+    #     dest: "{{ workdir }}/config.toml"
 
 
     - name: Image Mode CI/CD - AAP | Generate ISO Image with bootc-image-builder
@@ -89,13 +88,15 @@
           - "/var/lib/containers/storage:/var/lib/containers/storage"
           - "{{ workdir }}/config.toml:/config.toml"
           - "{{ workdir }}/output:/output"
-        command: "--type iso --config /config.toml --tls-verify=false {{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}:{{ image_tag }}"
+        command: "--type {{ destination_image_format }} --config /config.toml --tls-verify=false {{ custom_registry_url }}/{{ custom_registry_username }}/{{ source_image_name }}:{{ source_image_tag }}"
 
     - name: Image Mode CI/CD - AAP | Wait for image to be generated. It can take a while.
-      ansible.builtin.wait_for:
-        path: "{{ workdir }}/output/bootiso/install.iso"
-        state: present
-        timeout: 10000
+      containers.podman.podman_container_info:
+        name: bootc-image-builder
+      register: _output
+      until: not _output.containers.0.State.Running
+      retries: 50
+      delay: 30
 
     - name: Image Mode CI/CD - AAP | Fix permissions
       become: true
@@ -107,20 +108,20 @@
         owner: "{{ ansible_user_id }}"
         group: "{{ ansible_user_id }}"
 
-- name: Image Mode CI/CD - AAP | Publish ISO and Kickstart
-  hosts: webserver
-  tasks:
-    - name: Image Mode CI/CD - AAP | Set working directory
-      ansible.builtin.set_fact:
-        workdir: "/home/{{ ansible_user }}/rhel-image-mode"
-        image_tag: app
+# - name: Image Mode CI/CD - AAP | Publish ISO and Kickstart
+#   hosts: webserver
+#   tasks:
+#     - name: Image Mode CI/CD - AAP | Set working directory
+#       ansible.builtin.set_fact:
+#         workdir: "/home/{{ ansible_user }}/rhel-image-mode"
+#         image_tag: app
 
-    - name: Image Mode CI/CD - AAP | Upload ISO file to file server
-      become: true
-      ansible.posix.synchronize:
-        src: "{{ workdir }}/output/bootiso/install.iso"
-        dest: /var/www/html/bootc/rhel9.iso
-      delegate_to: "{{ groups['build_host'][0] }}"
+#     - name: Image Mode CI/CD - AAP | Upload ISO file to file server
+#       become: true
+#       ansible.posix.synchronize:
+#         src: "{{ workdir }}/output/bootiso/install.iso"
+#         dest: /var/www/html/bootc/rhel9.iso
+#       delegate_to: "{{ groups['build_host'][0] }}"
 
     # - name: Image Mode CI/CD - AAP | Cleanup local working directory
     #   ansible.builtin.file:

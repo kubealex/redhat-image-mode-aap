@@ -171,13 +171,24 @@ image_conversion_survey:
       default: "latest"
       index: 1
       variable: "source_image_tag"
-    - question_name: "Destination media format"
-      question_description: "Git repository address where Containerfile is stored"
-      required: true
-      type: "text"
+    - question_name: "config.toml content"
+      question_description: "Configuration TOML file content"
+      required: false
+      type: "textarea"
       default: ""
       index: 2
-      variable: "repo_url"
+      variable: "source_image_tag"
+    - question_name: "Destination media format"
+      question_description: "Media format of the resulting image (QCOW2, ISO, etc)"
+      required: true
+      type: "multiplechoice"
+      choices:
+        - "qcow2"
+        - "anaconda-iso"
+        - "raw"
+      default: "qcow2"
+      index: 3
+      variable: "config_toml_content"
 
 controller_inventories:
   - name: Image Mode CI/CD - AAP - SCM Inventory
