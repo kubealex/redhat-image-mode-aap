@@ -43,7 +43,7 @@
         image: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}:latest"
         target_names:
           - "{{ custom_registry_url }}/{{ custom_registry_username }}/rhel-image-mode-demo:{{ item }}"
-      loop: "{{ image_tags | trim | split('\n') }}"
+      loop: "{{ image_tags | from_yaml }}"
 
     - name: Image Mode CI/CD - AAP | Push RHEL Image
       containers.podman.podman_image:
@@ -52,7 +52,7 @@
         push: true
         pull: false
         tag: "{{ item }}"
-      loop: "{{ image_tags | trim | split('\n') }}"
+      loop: "{{ image_tags | from_yaml }}"
 
     - name: Image Mode CI/CD - AAP | Cleanup local working directory
       ansible.builtin.file:

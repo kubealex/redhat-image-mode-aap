@@ -141,7 +141,7 @@ image_build_survey:
     - question_name: "Image tags"
       question_description: "List of image tags to assign"
       required: true
-      type: "text"
+      type: "textarea"
       default: "- latest"
       index: 1
       variable: "image_tags"
