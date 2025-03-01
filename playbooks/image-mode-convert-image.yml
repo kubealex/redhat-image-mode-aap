@@ -81,7 +81,7 @@
         name: bootc-image-builder
         image: registry.redhat.io/rhel9/bootc-image-builder:latest
         privileged: true
-        remove: true
+        remove: false
         pull: newer
         security_opt:
           - label=type:unconfined_t
