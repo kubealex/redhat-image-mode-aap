@@ -82,6 +82,7 @@
         command: "--type {{ destination_image_format }} --config /config.toml --tls-verify=false {{ custom_registry_url }}/{{ custom_registry_username }}/{{ source_image_name }}:{{ source_image_tag }}"
 
     - name: Image Mode CI/CD - AAP | Wait for image to be generated. It can take a while.
+      become: true
       containers.podman.podman_container_info:
         name: bootc-image-builder
       register: _output
@@ -90,6 +91,7 @@
       delay: 30
 
     - name: Image Mode CI/CD - AAP | Remove bootc-image-builder container
+      become: true
       containers.podman.podman_container:
         name: bootc-image-builder
         state: absent
