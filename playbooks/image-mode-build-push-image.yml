@@ -6,11 +6,14 @@
       ansible.builtin.set_fact:
         workdir: "/home/{{ ansible_user }}/rhel-image-mode"
 
+    - name: Image Mode CI/CD - AAP | Set working directory
+      ansible.builtin.set_fact:
+        build_dir: "{{ workdir }}/_build"
+
     - name: Image Mode CI/CD - AAP | Clone repo
       ansible.builtin.git:
         repo: "{{ repo_url }}"
-        dest: "{{ workdir }}"
-      register: _build_dir
+        dest: "{{ build_dir }}"
 
     - name: Image Mode CI/CD - AAP | Login to registry
       no_log: true
@@ -32,7 +35,7 @@
         build_args:
           force_rm: true
           extra_args: "--build-arg REGISTRY_URL={{ custom_registry_url }} --build-arg REGISTRY_USER={{ custom_registry_username }}"
-        path: "{{ _build_dir }}"
+        path: "{{ build_dir }}"
         pull: false
 
     - name: Image Mode CI/CD - AAP | Tag Image
