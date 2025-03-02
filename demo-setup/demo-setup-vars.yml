@@ -17,7 +17,7 @@ automation_hub_url: https://console.redhat.com/api/automation-hub/content/publis
 automation_hub_auth_url: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
 automation_hub_token:
 
-### Hostname/IP of the server hosting builds, webserver and Gitea instance
+### Hostname/IP of the server hosting builds
 server_hostname: rhel-bootc.rh-lab.labs
 
 ### Credentials for the server
@@ -28,6 +28,11 @@ server_password: redhat
 custom_registry_url: quay.io
 custom_registry_username:
 custom_registry_password:
+
+### OPTIONAL - AWS Credentials to push AMIs
+aws_access_key:
+aws_secret_key:
+aws_sts_token:
 
 # -------------------------------------------------------------------------------------------------------------
 # ------------------------------------DO NOT EDIT ANYTHING BELOW THIS LINE!------------------------------------
@@ -114,6 +119,14 @@ controller_credentials:
       custom_registry_url: "{{ custom_registry_url | default(server_hostname + ':3000', true) }}"
       custom_registry_user: "{{ custom_registry_username | default(gitea_username, true) }}"
       custom_registry_pwd: "{{ custom_registry_password | default(gitea_password, true)  }}"
+### OPTIONAL - AWS ONLY, LEAVE BLANK IF NOT USED
+  - name: Image Mode CI/CD - AAP - AWS Credentials
+    credential_type: "Amazon Web Services"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      username: "{{ aws_access_key | default('N/A', true) }}"
+      password: "{{ aws_secret_key | default('N/A', true) }}"
+      security_token: "{{ aws_sts_token | default('N/A', true) }}"
 
 controller_projects:
   - name: "Image Mode CI/CD - AAP"
@@ -175,7 +188,11 @@ image_conversion_survey:
       question_description: "Configuration TOML file content"
       required: false
       type: "textarea"
-      default: ""
+      default: |
+        [[customizations.user]]
+        name = "sysadmin"
+        password = "redhat"
+        groups = ["wheel"]
       index: 2
       variable: "source_image_tag"
     - question_name: "Destination media format"
@@ -186,9 +203,33 @@ image_conversion_survey:
         - "qcow2"
         - "anaconda-iso"
         - "raw"
+        - "vmdk"
+        - "ami"
+        - "gcp"
       default: "qcow2"
       index: 3
       variable: "config_toml_content"
+    - question_name: "AWS AMI name"
+      question_description: "Name of the AWS AMI to create - Required for AMI destination media"
+      required: false
+      type: "text"
+      default: ""
+      index: 4
+      variable: "aws_ami_name"
+    - question_name: "AWS S3 Bucket"
+      question_description: "S3 Bucket to upload the AMI to - Required for AMI destination media"
+      required: false
+      type: "text"
+      default: ""
+      index: 5
+      variable: "aws_bucket"
+    - question_name: "AWS Region - Required for AMI destination media"
+      question_description: "AWS Region - Required for AMI destination media"
+      required: false
+      type: "text"
+      default: ""
+      index: 6
+      variable: "aws_region"
 
 controller_inventories:
   - name: Image Mode CI/CD - AAP - SCM Inventory
@@ -242,6 +283,7 @@ controller_templates:
       - Image Mode CI/CD - AAP - Linux Credentials
       - Image Mode CI/CD - AAP - Custom Registry Credentials
       - Image Mode CI/CD - AAP - Redhat Registry Credentials
+      - Image Mode CI/CD - AAP - AWS Credentials
     inventory: Image Mode CI/CD - AAP - SCM Inventory
     project: Image Mode CI/CD - AAP
     survey_enabled: true
