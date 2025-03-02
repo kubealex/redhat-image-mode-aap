@@ -194,7 +194,7 @@ image_conversion_survey:
         password = "redhat"
         groups = ["wheel"]
       index: 2
-      variable: "source_image_tag"
+      variable: "config_toml_content"
     - question_name: "Destination media format"
       question_description: "Media format of the resulting image (QCOW2, ISO, etc)"
       required: true
@@ -208,7 +208,7 @@ image_conversion_survey:
         - "gcp"
       default: "qcow2"
       index: 3
-      variable: "config_toml_content"
+      variable: "destination_image_format"
     - question_name: "AWS AMI name"
       question_description: "Name of the AWS AMI to create - Required for AMI destination media"
       required: false
