@@ -116,9 +116,9 @@ controller_credentials:
     credential_type: "Image Mode CI/CD - AAP - Custom Registry Auth"
     organization: "{{ aap2_organization }}"
     inputs:
-      custom_registry_url: "{{ custom_registry_url | default(server_hostname + ':3000', true) }}"
-      custom_registry_user: "{{ custom_registry_username | default(gitea_username, true) }}"
-      custom_registry_pwd: "{{ custom_registry_password | default(gitea_password, true)  }}"
+      custom_registry_url: "{{ custom_registry_url }}"
+      custom_registry_user: "{{ custom_registry_username }}"
+      custom_registry_pwd: "{{ custom_registry_password }}"
 ### OPTIONAL - AWS ONLY, LEAVE BLANK IF NOT USED
   - name: Image Mode CI/CD - AAP - AWS Credentials
     credential_type: "Amazon Web Services"
