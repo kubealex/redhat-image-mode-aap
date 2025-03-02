@@ -63,6 +63,22 @@
     #       """
     #     dest: "{{ workdir }}/config.toml"
 
+    - name: Image Mode CI/CD - AAP | Set conversion command
+      ansible.builtin.set_fact:
+        conversion_command: --type {{ destination_image_format }} --tls-verify=false {{ custom_registry_url }}/{{ custom_registry_username }}/{{ source_image_name }}:{{ source_image_tag }}"
+
+    - name: Image Mode CI/CD - AAP | Set conversion command for AWS
+      when: destination_image_format == "ami"
+      ansible.builtin.set_fact:
+        conversion_command: "--aws-ami-name {{ aws_ami_name }} --aws-bucket {{ aws_bucket }} --aws-region {{ aws_region }} {{ conversion_command }} "
+
+    - name: Image Mode CI/CD - AAP | Set conversion command for Config.toml
+      when:
+        - config_toml_content is defined
+        - config_toml_content != ""
+      ansible.builtin.set_fact:
+        conversion_command: "--config /config.toml {{ conversion_command }}"
+
     - name: Image Mode CI/CD - AAP | Generate ISO Image with bootc-image-builder
       become: true
       containers.podman.podman_container:
@@ -79,7 +95,7 @@
           - "/run/containers/0:/run/containers/0"
           - "{{ workdir }}/config.toml:/config.toml"
           - "{{ workdir }}/output:/output"
-        command: "--type {{ destination_image_format }} --config /config.toml --tls-verify=false {{ custom_registry_url }}/{{ custom_registry_username }}/{{ source_image_name }}:{{ source_image_tag }}"
+        command: "{{ conversion_command }}"
 
     - name: Image Mode CI/CD - AAP | Wait for image to be generated. It can take a while.
       become: true
