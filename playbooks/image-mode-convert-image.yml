@@ -65,12 +65,12 @@
 
     - name: Image Mode CI/CD - AAP | Set conversion command
       ansible.builtin.set_fact:
-        conversion_command: --type {{ destination_image_format }} --tls-verify=false {{ custom_registry_url }}/{{ custom_registry_username }}/{{ source_image_name }}:{{ source_image_tag }}"
+        conversion_command: "--type {{ destination_image_format }} --tls-verify=false {{ custom_registry_url }}/{{ custom_registry_username }}/{{ source_image_name }}:{{ source_image_tag }}"
 
     - name: Image Mode CI/CD - AAP | Set conversion command for AWS
       when: destination_image_format == "ami"
       ansible.builtin.set_fact:
-        conversion_command: "--aws-ami-name {{ aws_ami_name }} --aws-bucket {{ aws_bucket }} --aws-region {{ aws_region }} {{ conversion_command }} "
+        conversion_command: "--aws-ami-name {{ aws_ami_name }} --aws-bucket {{ aws_bucket }} --aws-region {{ aws_region }} {{ conversion_command }}"
 
     - name: Image Mode CI/CD - AAP | Set conversion command for Config.toml
       when:
@@ -106,11 +106,11 @@
       retries: 50
       delay: 30
 
-    # - name: Image Mode CI/CD - AAP | Remove bootc-image-builder container
-    #   become: true
-    #   containers.podman.podman_container:
-    #     name: bootc-image-builder
-    #     state: absent
+    - name: Image Mode CI/CD - AAP | Remove bootc-image-builder container
+      become: true
+      containers.podman.podman_container:
+        name: bootc-image-builder
+        state: absent
 
     - name: Image Mode CI/CD - AAP | Fix permissions
       become: true
