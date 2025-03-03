@@ -1,0 +1,316 @@
+# ------------------------------------DO NOT EDIT ANYTHING BELOW THIS LINE!------------------------------------
+
+controller_credential_types:
+  - name: Image Mode CI/CD - AAP - Redhat Registry Auth
+    description: "Credentials for Red Hat Registry"
+    inputs:
+      fields:
+        - id: image_registry_url
+          type: string
+          label: "Image Registry URL"
+          secret: false
+        - id: image_registry_user
+          type: string
+          label: "Image Registry username"
+          secret: false
+        - id: image_registry_pwd
+          type: string
+          label: "Image Registry password"
+          secret: true
+      required:
+        - image_registry_url
+        - image_registry_user
+        - image_registry_pwd
+    injectors:
+      extra_vars:
+        redhat_registry_url: !unsafe "{{ image_registry_url }}"
+        redhat_registry_username: !unsafe "{{ image_registry_user }}"
+        redhat_registry_password: !unsafe "{{ image_registry_pwd }}"
+# ------------------------------------
+  - name: Image Mode CI/CD - AAP - Custom Registry Auth
+    description: "Credentials for custom registry"
+    inputs:
+      fields:
+        - id: custom_registry_url
+          type: string
+          label: "Image Registry URL"
+          secret: false
+        - id: custom_registry_user
+          type: string
+          label: "Image Registry username"
+          secret: false
+        - id: custom_registry_pwd
+          type: string
+          label: "Image Registry password"
+          secret: true
+      required:
+        - custom_registry_url
+        - custom_registry_user
+        - custom_registry_pwd
+    injectors:
+      extra_vars:
+        custom_registry_url: !unsafe "{{ custom_registry_url }}"
+        custom_registry_username: !unsafe "{{ custom_registry_user }}"
+        custom_registry_password: !unsafe "{{ custom_registry_pwd }}"
+# ------------------------------------
+
+controller_credentials:
+  - name: Image Mode CI/CD - AAP - Galaxy Credentials
+    credential_type: "Ansible Galaxy/Automation Hub API Token"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      url: "{{ automation_hub_url }}"
+      auth_url: "{{ automation_hub_auth_url }}"
+      token: "{{ automation_hub_token }}"
+  - name: "Image Mode CI/CD - AAP - Linux Credentials"
+    credential_type: "Machine"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      username: "{{ server_username }}"
+      password: "{{ server_password }}"
+  - name: Image Mode CI/CD - AAP - Redhat Registry Credentials
+    credential_type: "Image Mode CI/CD - AAP - Redhat Registry Auth"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      image_registry_url: "{{ redhat_registry_url }}"
+      image_registry_user: "{{ redhat_registry_username }}"
+      image_registry_pwd: "{{ redhat_registry_password }}"
+  - name: Image Mode CI/CD - AAP - Custom Registry Credentials
+    credential_type: "Image Mode CI/CD - AAP - Custom Registry Auth"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      custom_registry_url: "{{ custom_registry_url }}"
+      custom_registry_user: "{{ custom_registry_username }}"
+      custom_registry_pwd: "{{ custom_registry_password }}"
+### OPTIONAL - AWS ONLY, LEAVE BLANK IF NOT USED
+  - name: Image Mode CI/CD - AAP - AWS Credentials
+    credential_type: "Amazon Web Services"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      username: "{{ aws_access_key | default('N/A', true) }}"
+      password: "{{ aws_secret_key | default('N/A', true) }}"
+      security_token: "{{ aws_sts_token | default('N/A', true) }}"
+
+controller_projects:
+  - name: "Image Mode CI/CD - AAP"
+    organization: "{{ aap2_organization }}"
+    scm_url: "{{ git_repository | default('https://github.com/kubealex/redhat-image-mode-aap', true) }}"
+    scm_branch: "main"
+    scm_type: git
+    default_environment: "Minimal execution environment"
+    update_project: true
+    wait: true
+    scm_update_on_launch: false
+  # ------------------------------------
+
+image_build_survey:
+  description: "Image build survey"
+  name: "Image build parameters"
+  spec:
+    - question_name: "Image name"
+      question_description: "Image name to use for the build"
+      required: true
+      type: "text"
+      default: "rhel-bootc-demo"
+      index: 0
+      variable: "image_name"
+    - question_name: "Image tags"
+      question_description: "List of image tags to assign"
+      required: true
+      type: "textarea"
+      default: "- latest"
+      index: 1
+      variable: "image_tags"
+    - question_name: "Image Containerfile location - Git"
+      question_description: "Git repository address where Containerfile is stored"
+      required: true
+      type: "text"
+      default: ""
+      index: 2
+      variable: "repo_url"
+
+image_conversion_survey:
+  description: "Image build survey"
+  name: "Image build parameters"
+  spec:
+    - question_name: "Source image name"
+      question_description: "Name of the image to convert"
+      required: true
+      type: "text"
+      default: "rhel-bootc-demo"
+      index: 0
+      variable: "source_image_name"
+    - question_name: "Source image tag"
+      question_description: "Tag of the image to convert"
+      required: true
+      type: "text"
+      default: "latest"
+      index: 1
+      variable: "source_image_tag"
+    - question_name: "config.toml content"
+      question_description: "Configuration TOML file content"
+      required: false
+      type: "textarea"
+      default: |
+        [[customizations.user]]
+        name = "sysadmin"
+        password = "redhat"
+        groups = ["wheel"]
+      index: 2
+      variable: "config_toml_content"
+    - question_name: "Destination media format"
+      question_description: "Media format of the resulting image (QCOW2, ISO, etc)"
+      required: true
+      type: "multiplechoice"
+      choices:
+        - "qcow2"
+        - "anaconda-iso"
+        - "raw"
+        - "vmdk"
+        - "ami"
+        - "gcp"
+      default: "qcow2"
+      index: 3
+      variable: "destination_image_format"
+    - question_name: "AWS AMI name"
+      question_description: "Name of the AWS AMI to create - Required for AMI destination media"
+      required: false
+      type: "text"
+      default: ""
+      index: 4
+      variable: "aws_ami_name"
+    - question_name: "AWS S3 Bucket"
+      question_description: "S3 Bucket to upload the AMI to - Required for AMI destination media"
+      required: false
+      type: "text"
+      default: ""
+      index: 5
+      variable: "aws_bucket"
+    - question_name: "AWS Region - Required for AMI destination media"
+      question_description: "AWS Region - Required for AMI destination media"
+      required: false
+      type: "text"
+      default: ""
+      index: 6
+      variable: "aws_region"
+
+controller_inventories:
+  - name: Image Mode CI/CD - AAP - SCM Inventory
+    organization: "{{ aap2_organization }}"
+  # ------------------------------------
+
+controller_hosts:
+  - name: "{{ server_hostname }}"
+    inventory: Image Mode CI/CD - AAP - SCM Inventory
+
+controller_groups:
+  - name: build_host
+    inventory: Image Mode CI/CD - AAP - SCM Inventory
+    hosts:
+      - "{{ server_hostname }}"
+
+# aap2_inventory_sources:
+#   - aap2_inventory_source_name: Image Mode CI/CD - AAP - SCM Inventory Source
+#     aap2_inventory_source_inventory: Image Mode CI/CD - AAP - SCM Inventory
+#     aap2_inventory_source_type: scm
+#     aap2_inventory_source_project: "Image Mode CI/CD - AAP"
+#     aap2_inventory_source_path: inventory
+  # ------------------------------------
+  # ------------------------------------
+
+controller_templates:
+  - name: "[Image Mode CI/CD - AAP] Build and push image"
+    organization: "{{ aap2_organization }}"
+    playbook: playbooks/image-mode-build-push-image.yml
+    credentials:
+      - Image Mode CI/CD - AAP - Linux Credentials
+      - Image Mode CI/CD - AAP - Custom Registry Credentials
+      - Image Mode CI/CD - AAP - Redhat Registry Credentials
+    inventory: Image Mode CI/CD - AAP - SCM Inventory
+    project: Image Mode CI/CD - AAP
+    survey_enabled: true
+    survey_spec: "{{ image_build_survey }}"
+    # ------------------------------------
+  - name: "[Image Mode CI/CD - AAP] Prepare builder server"
+    organization: "{{ aap2_organization }}"
+    playbook: playbooks/image-mode-prepare-builder.yml
+    credentials:
+      - Image Mode CI/CD - AAP - Linux Credentials
+    inventory: Image Mode CI/CD - AAP - SCM Inventory
+    project: Image Mode CI/CD - AAP
+    # ------------------------------------
+  - name: "[Image Mode CI/CD - AAP] Convert Image"
+    organization: "{{ aap2_organization }}"
+    playbook: playbooks/image-mode-convert-image.yml
+    credentials:
+      - Image Mode CI/CD - AAP - Linux Credentials
+      - Image Mode CI/CD - AAP - Custom Registry Credentials
+      - Image Mode CI/CD - AAP - Redhat Registry Credentials
+      - Image Mode CI/CD - AAP - AWS Credentials
+    inventory: Image Mode CI/CD - AAP - SCM Inventory
+    project: Image Mode CI/CD - AAP
+    survey_enabled: true
+    survey_spec: "{{ image_conversion_survey }}"
+    # ------------------------------------
+
+# aap2_workflows:
+#   - aap2_workflow_name: "[Image Mode CI/CD - AAP] Build Image Mode application image"
+#     aap2_workflow_project: Image Mode CI/CD - AAP
+#     aap2_workflow_ask_extra_vars: true
+#     aap2_workflow_extra_vars:
+#       image_tag: app
+#       build_folder: app-repo
+#       repo_url: "https://{{ server_hostname }}:{{ gitea_server_port | default('3000', true) }}/{{ gitea_username }}/rh1-image-mode-container-app"
+#     aap2_workflow_nodes:
+#       - node_name: image-mode-build-scan
+#         approval: false
+#         nodes_on_success:
+#           - image-mode-approve-scan
+#         node_job_template: "[Image Mode CI/CD - AAP] Build and scan image"
+#       - node_name: image-mode-approve-scan
+#         approval: true
+#         description: "Review the RHEL Image scan and proceed with push"
+#         nodes_on_success:
+#           - image-mode-push
+#       - node_name: image-mode-push
+#         approval: false
+#         node_job_template: "[Image Mode CI/CD - AAP] Push image"
+#
+#   - aap2_workflow_name: "[Image Mode CI/CD - AAP] Build Image Mode SOE Image"
+#     aap2_workflow_project: Image Mode CI/CD - AAP
+#     aap2_workflow_ask_extra_vars: true
+#     aap2_workflow_extra_vars:
+#       image_tag: soe
+#       build_folder: soe-repo
+#       repo_url: "https://{{ server_hostname }}:{{ gitea_server_port | default('3000', true) }}/{{ gitea_username }}/rh1-image-mode-soe"
+#     aap2_workflow_nodes:
+#       - node_name: image-mode-build-scan
+#         approval: false
+#         nodes_on_success:
+#           - image-mode-approve-scan
+#         node_job_template: "[Image Mode CI/CD - AAP] Build and scan image"
+#       - node_name: image-mode-approve-scan
+#         approval: true
+#         description: "Review the RHEL Image scan and proceed with push"
+#         nodes_on_success:
+#           - image-mode-push
+#       - node_name: image-mode-push
+#         approval: false
+#         node_job_template: "[Image Mode CI/CD - AAP] Push image"
+#
+#   - aap2_workflow_name: "[Image Mode CI/CD - AAP] Build Image and convert to media (ISO,QCOW2, ...)"
+#     aap2_workflow_project: Image Mode CI/CD - AAP
+#     aap2_workflow_ask_extra_vars: true
+#     aap2_workflow_extra_vars:
+#       image_tag: app
+#       build_folder: app-repo
+#       repo_url: "https://{{ server_hostname }}:{{ gitea_server_port | default('3000', true) }}/{{ gitea_username }}/rh1-image-mode-container-app"
+#     aap2_workflow_nodes:
+#       - node_name: image-mode-build-push
+#         approval: false
+#         nodes_on_success:
+#           - image-mode-convert
+#         node_job_template: "[Image Mode CI/CD - AAP] Build and push image"
+#       - node_name: image-mode-convert
+#         approval: false
+#         node_job_template: "[Image Mode CI/CD - AAP] Convert Image"

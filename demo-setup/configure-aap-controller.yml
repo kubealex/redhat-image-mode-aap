@@ -3,6 +3,7 @@
   hosts: localhost
   vars_files:
     - demo-setup-vars.yml
+    - internal-vars.yml
   vars:
     aap_hostname: "{{ aap2_controller_url }}"
     aap_username: "{{ aap2_controller_username }}"

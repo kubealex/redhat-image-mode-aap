@@ -5,6 +5,7 @@
   hosts: localhost
   vars_files:
     - demo-setup-vars.yml
+    - internal-vars.yml
   tasks:
     - name: Image Mode CI/CD - AAP | Run Builder server config
       ansible.controller.job_launch:
