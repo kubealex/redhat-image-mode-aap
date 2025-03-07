@@ -121,13 +121,27 @@ image_build_survey:
       default: "- latest"
       index: 1
       variable: "image_tags"
-    - question_name: "Image Containerfile location - Git"
-      question_description: "Git repository address where Containerfile is stored"
+    - question_name: "Git repo where Containerfile and build files are stored"
+      question_description: "Git repository address"
       required: true
       type: "text"
       default: ""
       index: 2
       variable: "repo_url"
+    - question_name: "Containerfile path"
+      question_description: "Path for the Containerfile"
+      required: true
+      type: "text"
+      default: "./Containerfile"
+      index: 3
+      variable: "containerfile_path"
+    - question_name: "Container build context"
+      question_description: "Path to the image build context"
+      required: true
+      type: "text"
+      default: "."
+      index: 4
+      variable: "image_build_context"
 
 image_conversion_survey:
   description: "Image build survey"

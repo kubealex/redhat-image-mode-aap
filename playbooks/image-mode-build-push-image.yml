@@ -34,8 +34,8 @@
         name: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}"
         build_args:
           force_rm: true
-          extra_args: "--build-arg REGISTRY_URL={{ custom_registry_url }} --build-arg REGISTRY_USER={{ custom_registry_username }}"
-        path: "{{ build_dir }}"
+          file: "{{ containerfile_path }}"
+        path: "{{ build_dir }}/{{ image_build_context }}"
         pull: false
 
     - name: Image Mode CI/CD - AAP | Tag Image
