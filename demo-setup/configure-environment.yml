@@ -13,6 +13,6 @@
         controller_username: "{{ aap2_controller_username }}"
         controller_password: "{{ aap2_controller_password }}"
         validate_certs: "{{ aap2_controller_validate_ssl | default(false, true) }}"
-        organization: Default
+        organization: "{{ aap2_organization }}"
         job_template: "[Image Mode CI/CD - AAP] Prepare builder server"
         wait: true
