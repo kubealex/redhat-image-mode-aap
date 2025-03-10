@@ -4,7 +4,7 @@
   tasks:
     - name: Image Mode CI/CD - AAP | Set working directory
       ansible.builtin.set_fact:
-        workdir: "{{ working_dir | deault(lookup('env','HOME') + '/rhel-image-mode', true) }}"
+        workdir: "{{ working_dir | default(lookup('env','HOME') + '/rhel-image-mode', true) }}"
 
     - name: Image Mode CI/CD - AAP | Set working directory
       ansible.builtin.set_fact:
