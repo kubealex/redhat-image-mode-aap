@@ -142,6 +142,13 @@ image_build_survey:
       default: "."
       index: 4
       variable: "image_build_context"
+    - question_name: "Working directory"
+      question_description: "Path to the working directory to use, if not set, it defaults to $HOME/rhel-image-mode"
+      required: true
+      type: "text"
+      default: ""
+      index: 5
+      variable: "working_dir"
 
 image_conversion_survey:
   description: "Image build survey"
@@ -172,8 +179,15 @@ image_conversion_survey:
         groups = ["wheel"]
       index: 2
       variable: "config_toml_content"
+    - question_name: "Working directory"
+      question_description: "Path to the working directory to use, if not set, it defaults to $HOME/rhel-image-mode"
+      required: true
+      type: "text"
+      default: ""
+      index: 3
+      variable: "working_dir"
     - question_name: "Destination media format"
-      question_description: "Media format of the resulting image (QCOW2, ISO, etc)"
+      question_description: "Media format of the resulting image (QCOW2, ISO, etc). Result images are stored in an 'output' folder in the Working directory"
       required: true
       type: "multiplechoice"
       choices:
@@ -184,28 +198,28 @@ image_conversion_survey:
         - "ami"
         - "gcp"
       default: "qcow2"
-      index: 3
+      index: 4
       variable: "destination_image_format"
     - question_name: "AWS AMI name"
       question_description: "Name of the AWS AMI to create - Required for AMI destination media"
       required: false
       type: "text"
       default: ""
-      index: 4
+      index: 5
       variable: "aws_ami_name"
     - question_name: "AWS S3 Bucket"
       question_description: "S3 Bucket to upload the AMI to - Required for AMI destination media"
       required: false
       type: "text"
       default: ""
-      index: 5
+      index: 6
       variable: "aws_bucket"
     - question_name: "AWS Region - Required for AMI destination media"
       question_description: "AWS Region - Required for AMI destination media"
       required: false
       type: "text"
       default: ""
-      index: 6
+      index: 7
       variable: "aws_region"
 
 controller_inventories:

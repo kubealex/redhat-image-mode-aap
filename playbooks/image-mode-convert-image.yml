@@ -4,7 +4,7 @@
   tasks:
     - name: Image Mode CI/CD - AAP | Set working directory
       ansible.builtin.set_fact:
-        workdir: "/home/{{ ansible_user }}/rhel-image-mode"
+        workdir: "{{ working_dir | deault(lookup('env','HOME') + '/rhel-image-mode', true) }}"
 
     - name: Image Mode CI/CD - AAP | Login to registry - Root
       become: true
