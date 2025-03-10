@@ -144,7 +144,7 @@ image_build_survey:
       variable: "image_build_context"
     - question_name: "Working directory"
       question_description: "Path to the working directory to use, if not set, it defaults to $HOME/rhel-image-mode"
-      required: true
+      required: false
       type: "text"
       default: ""
       index: 5
@@ -181,7 +181,7 @@ image_conversion_survey:
       variable: "config_toml_content"
     - question_name: "Working directory"
       question_description: "Path to the working directory to use, if not set, it defaults to $HOME/rhel-image-mode"
-      required: true
+      required: false
       type: "text"
       default: ""
       index: 3
