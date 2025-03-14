@@ -34,38 +34,9 @@
         - config_toml_content is defined
         - config_toml_content != ""
 
-    # - name: Image Mode CI/CD - AAP | Embed Kickstart into configuration
-    #   ansible.builtin.copy:
-    #     content: |
-    #       [customizations.installer.kickstart]
-    #       contents = """
-    #       reboot
-    #       network --bootproto=dhcp
-    #       zerombr
-    #       clearpart --all --initlabel --disklabel=gpt
-    #       part biosboot  --size=1    --fstype=biosboot
-    #       part /boot --size=1024 --fstype=ext4 --label=boot
-    #       part /boot/efi --size=100  --fstype=efi
-    #       part / --size=1000 --fstype=xfs --grow
-    #       keyboard us
-    #       lang en_US
-    #       timezone Europe/Rome
-    #       rootpw redhat
-    #       %post
-    #       mkdir -p /etc/containers/registries.conf.d/
-    #       cat > /etc/containers/registries.conf.d/gitea-registry.conf << 'EOF'
-    #       [[registry]]
-    #       location = "{{ custom_registry_url }}"
-    #       insecure = true
-    #       EOF
-    #       bootc switch --mutate-in-place --transport registry {{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}:{{ image_tag }}
-    #       %end
-    #       """
-    #     dest: "{{ workdir }}/config.toml"
-
     - name: Image Mode CI/CD - AAP | Set conversion command
       ansible.builtin.set_fact:
-        conversion_command: "--type {{ destination_image_format }} --tls-verify=false {{ custom_registry_url }}/{{ custom_registry_username }}/{{ source_image_name }}:{{ source_image_tag }}"
+        conversion_command: "--type {{ destination_image_format }} --tls-verify=false {{ source_image_name }}:{{ source_image_tag }}"
 
     - name: Image Mode CI/CD - AAP | Set conversion command for AWS
       when: destination_image_format == "ami"

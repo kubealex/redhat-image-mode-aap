@@ -31,7 +31,7 @@
 
     - name: Image Mode CI/CD - AAP | Build RHEL Image
       containers.podman.podman_image:
-        name: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}"
+        name: "{{ image_name }}"
         build_args:
           force_rm: true
           file: "{{ containerfile_path }}"
@@ -40,14 +40,14 @@
 
     - name: Image Mode CI/CD - AAP | Tag Image
       containers.podman.podman_tag:
-        image: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}:latest"
+        image: "{{ image_name }}:latest"
         target_names:
           - "{{ custom_registry_url }}/{{ custom_registry_username }}/rhel-image-mode-demo:{{ item }}"
       loop: "{{ image_tags | from_yaml }}"
 
     - name: Image Mode CI/CD - AAP | Push RHEL Image
       containers.podman.podman_image:
-        name: "{{ custom_registry_url }}/{{ custom_registry_username }}/{{ image_name }}"
+        name: "{{ image_name }}"
         path: "{{ build_dir }}"
         push: true
         pull: false

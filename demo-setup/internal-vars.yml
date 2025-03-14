@@ -108,10 +108,10 @@ image_build_survey:
   name: "Image build parameters"
   spec:
     - question_name: "Image name"
-      question_description: "Image name to use for the build"
+      question_description: "Image name to use for the build - example quay.io/kubealex/rhel-bootc-demo"
       required: true
       type: "text"
-      default: "rhel-bootc-demo"
+      default: ""
       index: 0
       variable: "image_name"
     - question_name: "Image tags"
@@ -155,10 +155,10 @@ image_conversion_survey:
   name: "Image build parameters"
   spec:
     - question_name: "Source image name"
-      question_description: "Name of the image to convert"
+      question_description: "Name of the image to convert - example quay.io/kubealex/rhel-bootc-demo"
       required: true
       type: "text"
-      default: "rhel-bootc-demo"
+      default: ""
       index: 0
       variable: "source_image_name"
     - question_name: "Source image tag"
