@@ -6,6 +6,36 @@
       ansible.builtin.set_fact:
         workdir: "{{ working_dir | default(lookup('env','HOME') + '/rhel-image-mode', true) }}"
 
+    - name: Image Mode CI/CD - AAP | Set working directory
+      when: destination_image_format == 'anaconda-iso'
+      ansible.builtin.set_fact:
+        output_folder: "{{ working_dir }}/output/bootiso"
+        output_filename: "install.iso"
+
+    - name: Image Mode CI/CD - AAP | Set working directory
+      when: destination_image_format == 'qcow2'
+      ansible.builtin.set_fact:
+        output_folder: "{{ working_dir }}/output/qcow2"
+        output_filename: disk.qcow2
+
+    - name: Image Mode CI/CD - AAP | Set working directory
+      when: destination_image_format == 'gce'
+      ansible.builtin.set_fact:
+        output_folder: "{{ working_dir }}/output/gce"
+        output_filename: image.tar.gz
+
+    - name: Image Mode CI/CD - AAP | Set working directory
+      when: destination_image_format == 'raw'
+      ansible.builtin.set_fact:
+        output_folder: "{{ working_dir }}/output/image"
+        output_filename: disk.raw
+
+    - name: Image Mode CI/CD - AAP | Set working directory
+      when: destination_image_format == 'vmdk'
+      ansible.builtin.set_fact:
+        output_folder: "{{ working_dir }}/output/vmdk"
+        output_filename: disk.vmdk
+
     - name: Image Mode CI/CD - AAP | Login to registry - Root
       become: true
       no_log: true
@@ -92,6 +122,17 @@
         mode: "0755"
         owner: "{{ ansible_user_id }}"
         group: "{{ ansible_user_id }}"
+
+    - name: Image Mode CI/CD - AAP | Rename output file
+      ansible.builtin.copy:
+        src: "{{ output_folder }}/{{ output_filename }}"
+        dest: "{{ workdir }}/{{ destination_image_name }}"
+        mode: "0755"
+
+    - name: Image Mode CI/CD - AAP | Remove original file
+      ansible.builtin.file:
+        path: "{{ output_folder }}/{{ output_filename }}"
+        state: absent
 
 # - name: Image Mode CI/CD - AAP | Publish ISO and Kickstart
 #   hosts: webserver

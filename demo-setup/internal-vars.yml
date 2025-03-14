@@ -200,26 +200,33 @@ image_conversion_survey:
       default: "qcow2"
       index: 4
       variable: "destination_image_format"
+    - question_name: "Output image name - i.e. my_instance.qcow2"
+      question_description: "Filename of the resulting image"
+      required: false
+      type: "text"
+      default: ""
+      index: 5
+      variable: "destination_image_name"
     - question_name: "AWS AMI name"
       question_description: "Name of the AWS AMI to create - Required for AMI destination media"
       required: false
       type: "text"
       default: ""
-      index: 5
+      index: 6
       variable: "aws_ami_name"
     - question_name: "AWS S3 Bucket"
       question_description: "S3 Bucket to upload the AMI to - Required for AMI destination media"
       required: false
       type: "text"
       default: ""
-      index: 6
+      index: 7
       variable: "aws_bucket"
     - question_name: "AWS Region - Required for AMI destination media"
       question_description: "AWS Region - Required for AMI destination media"
       required: false
       type: "text"
       default: ""
-      index: 7
+      index: 8
       variable: "aws_region"
 
 controller_inventories:
