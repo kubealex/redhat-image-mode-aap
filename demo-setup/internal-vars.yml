@@ -116,7 +116,11 @@ controller_projects:
     update_project: true
     wait: true
     scm_update_on_launch: false
-  # ------------------------------------server_ssh_key_passphrase
+  # ------------------------------------
+image_build_survey:
+  description: "Image build survey"
+  name: "Image build parameters"
+  spec:
     - question_name: "Image name"
       question_description: "Image name to use for the build - example quay.io/kubealex/rhel-bootc-demo"
       required: true
