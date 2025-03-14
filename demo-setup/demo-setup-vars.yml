@@ -14,12 +14,22 @@ automation_hub_url: https://console.redhat.com/api/automation-hub/content/publis
 automation_hub_auth_url: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
 automation_hub_token:
 
+### GIT Credentials configuration
+
+configure_git_credentials: false
+git_username:
+git_password:
+git_ssh_key:
+git_ssh_key_passphrase:
+
 ### Hostname/IP of the server hosting builds
 server_hostname:
 
 ### Credentials for the server
 server_username:
 server_password:
+server_ssh_key:
+server_ssh_key_passphrase:
 
 ### Custom registry if not using Gitea integrated registry - Leave blank if using Gitea
 custom_registry_url: quay.io

@@ -54,7 +54,17 @@ controller_credential_types:
         custom_registry_password: !unsafe "{{ custom_registry_pwd }}"
 # ------------------------------------
 
-controller_credentials:
+scm_credentials:
+  - name: Image Mode CI/CD - AAP - SCM Credentials
+    credential_type: "Source Control"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      username: "{{ git_username | default(omit, true) }}"
+      password: "{{ git_password | default(omit, true) }}"
+      ssh_key_data: "{{ git_ssh_key | default(omit, true) }}"
+      ssh_key_unlock: "{{ git_ssh_key_passphrase | default(omit, true) }}"
+
+general_credentials:
   - name: Image Mode CI/CD - AAP - Galaxy Credentials
     credential_type: "Ansible Galaxy/Automation Hub API Token"
     organization: "{{ aap2_organization }}"
@@ -67,7 +77,9 @@ controller_credentials:
     organization: "{{ aap2_organization }}"
     inputs:
       username: "{{ server_username }}"
-      password: "{{ server_password }}"
+      password: "{{ server_password | default(omit, true) }}"
+      ssh_key_data: "{{ server_ssh_key | default(omit, true) }}"
+      ssh_key_unlock: "{{ server_ssh_key_passphrase | default(omit, true) }}"
   - name: Image Mode CI/CD - AAP - Redhat Registry Credentials
     credential_type: "Image Mode CI/CD - AAP - Redhat Registry Auth"
     organization: "{{ aap2_organization }}"
@@ -91,22 +103,20 @@ controller_credentials:
       password: "{{ aws_secret_key | default('N/A', true) }}"
       security_token: "{{ aws_sts_token | default('N/A', true) }}"
 
+controller_credentials: "{{ general_credentials + (scm_credentials if configure_git_credentials else []) }}"
+
 controller_projects:
   - name: "Image Mode CI/CD - AAP"
     organization: "{{ aap2_organization }}"
     scm_url: "{{ git_repository | default('https://github.com/kubealex/redhat-image-mode-aap', true) }}"
     scm_branch: "main"
     scm_type: git
+    credential: "{{ 'Image Mode CI/CD - AAP - SCM Credentials' if configure_git_credentials else omit }}"
     default_environment: "Minimal execution environment"
     update_project: true
     wait: true
     scm_update_on_launch: false
-  # ------------------------------------
-
-image_build_survey:
-  description: "Image build survey"
-  name: "Image build parameters"
-  spec:
+  # ------------------------------------server_ssh_key_passphrase
     - question_name: "Image name"
       question_description: "Image name to use for the build - example quay.io/kubealex/rhel-bootc-demo"
       required: true
