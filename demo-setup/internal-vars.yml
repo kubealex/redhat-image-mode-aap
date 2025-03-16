@@ -1,6 +1,6 @@
 # ------------------------------------DO NOT EDIT ANYTHING BELOW THIS LINE!------------------------------------
 
-controller_credential_types:
+registry_credentials_type:
   - name: Image Mode CI/CD - AAP - Redhat Registry Auth
     description: "Credentials for Red Hat Registry"
     inputs:
@@ -54,6 +54,8 @@ controller_credential_types:
         custom_registry_password: !unsafe "{{ custom_registry_pwd }}"
 # ------------------------------------
 
+controller_credential_types: "{{ registry_credentials_type if configure_registry_credentials else [] }}"
+
 scm_credentials:
   - name: Image Mode CI/CD - AAP - SCM Credentials
     credential_type: "Source Control"
@@ -63,6 +65,32 @@ scm_credentials:
       password: "{{ git_password | default(omit, true) }}"
       ssh_key_data: "{{ git_ssh_key | default(omit, true) }}"
       ssh_key_unlock: "{{ git_ssh_key_passphrase | default(omit, true) }}"
+
+registry_credentials:
+  - name: Image Mode CI/CD - AAP - Redhat Registry Credentials
+    credential_type: "Image Mode CI/CD - AAP - Redhat Registry Auth"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      image_registry_url: "{{ redhat_registry_url }}"
+      image_registry_user: "{{ redhat_registry_username }}"
+      image_registry_pwd: "{{ redhat_registry_password }}"
+  - name: Image Mode CI/CD - AAP - Custom Registry Credentials
+    credential_type: "Image Mode CI/CD - AAP - Custom Registry Auth"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      custom_registry_url: "{{ custom_registry_url }}"
+      custom_registry_user: "{{ custom_registry_username }}"
+      custom_registry_pwd: "{{ custom_registry_password }}"
+
+### OPTIONAL - AWS ONLY, LEAVE BLANK IF NOT USED
+aws_credentials:
+  - name: Image Mode CI/CD - AAP - AWS Credentials
+    credential_type: "Amazon Web Services"
+    organization: "{{ aap2_organization }}"
+    inputs:
+      username: "{{ aws_access_key | default('N/A', true) }}"
+      password: "{{ aws_secret_key | default('N/A', true) }}"
+      security_token: "{{ aws_sts_token | default('N/A', true) }}"
 
 general_credentials:
   - name: Image Mode CI/CD - AAP - Galaxy Credentials
@@ -80,30 +108,9 @@ general_credentials:
       password: "{{ server_password | default(omit, true) }}"
       ssh_key_data: "{{ server_ssh_key | default(omit, true) }}"
       ssh_key_unlock: "{{ server_ssh_key_passphrase | default(omit, true) }}"
-  - name: Image Mode CI/CD - AAP - Redhat Registry Credentials
-    credential_type: "Image Mode CI/CD - AAP - Redhat Registry Auth"
-    organization: "{{ aap2_organization }}"
-    inputs:
-      image_registry_url: "{{ redhat_registry_url }}"
-      image_registry_user: "{{ redhat_registry_username }}"
-      image_registry_pwd: "{{ redhat_registry_password }}"
-  - name: Image Mode CI/CD - AAP - Custom Registry Credentials
-    credential_type: "Image Mode CI/CD - AAP - Custom Registry Auth"
-    organization: "{{ aap2_organization }}"
-    inputs:
-      custom_registry_url: "{{ custom_registry_url }}"
-      custom_registry_user: "{{ custom_registry_username }}"
-      custom_registry_pwd: "{{ custom_registry_password }}"
-### OPTIONAL - AWS ONLY, LEAVE BLANK IF NOT USED
-  - name: Image Mode CI/CD - AAP - AWS Credentials
-    credential_type: "Amazon Web Services"
-    organization: "{{ aap2_organization }}"
-    inputs:
-      username: "{{ aws_access_key | default('N/A', true) }}"
-      password: "{{ aws_secret_key | default('N/A', true) }}"
-      security_token: "{{ aws_sts_token | default('N/A', true) }}"
 
-controller_credentials: "{{ general_credentials + (scm_credentials if configure_git_credentials else []) }}"
+
+controller_credentials: "{{ general_credentials + (scm_credentials if configure_git_credentials else []) + (registry_credentials if configure_registry_credentials else []) + (aws_credentials if configure_aws_credentials else []) }}"
 
 controller_projects:
   - name: "Image Mode CI/CD - AAP"
@@ -273,8 +280,8 @@ controller_templates:
     playbook: playbooks/image-mode-build-push-image.yml
     credentials:
       - Image Mode CI/CD - AAP - Linux Credentials
-      - Image Mode CI/CD - AAP - Custom Registry Credentials
-      - Image Mode CI/CD - AAP - Redhat Registry Credentials
+      - '{{ "Image Mode CI/CD - AAP - Custom Registry Credentials if configure_registry_credentials else omit }}'
+      - '{{ "Image Mode CI/CD - AAP - Redhat Registry Credentials" if configure_registry_credentials else omit }}'
     inventory: Image Mode CI/CD - AAP - SCM Inventory
     project: Image Mode CI/CD - AAP
     survey_enabled: true
@@ -293,8 +300,8 @@ controller_templates:
     playbook: playbooks/image-mode-convert-image.yml
     credentials:
       - Image Mode CI/CD - AAP - Linux Credentials
-      - Image Mode CI/CD - AAP - Custom Registry Credentials
-      - Image Mode CI/CD - AAP - Redhat Registry Credentials
+      - '{{ "Image Mode CI/CD - AAP - Custom Registry Credentials if configure_registry_credentials else omit }}'
+      - '{{ "Image Mode CI/CD - AAP - Redhat Registry Credentials" if configure_registry_credentials else omit }}'
       - Image Mode CI/CD - AAP - AWS Credentials
     inventory: Image Mode CI/CD - AAP - SCM Inventory
     project: Image Mode CI/CD - AAP
